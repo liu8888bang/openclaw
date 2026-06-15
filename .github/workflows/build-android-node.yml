@@ -1,4 +1,4 @@
-name: 编译OpenClaw安卓纯节点APK(通用版)
+name: 编译OpenClaw安卓纯节点APK
 on:
   workflow_dispatch:
 
@@ -6,11 +6,11 @@ jobs:
   build_apk:
     runs-on: ubuntu-latest
     steps:
-      # 1. 拉取源码
+      # 拉取源码，版本稳定
       - name: 拉取源码
         uses: actions/checkout@v5
 
-      # 2. 安装JDK17
+      # JDK17 安卓编译标准环境，官方Action最新稳定版
       - name: 安装JDK17
         uses: actions/setup-java@v5
         with:
@@ -18,22 +18,22 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      # 3. 部署Android SDK
+      # Android SDK 官方稳定版，修复旧版Node告警
       - name: 部署安卓SDK环境
         uses: android-actions/setup-android@v4
 
-      # 4. 编译 universal 通用纯净包
+      # 编译环节：使用项目原生存在的 PlayDebug 任务，路径、命令完全匹配源码结构
       - name: 编译APK
         working-directory: ./apps/android
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleUniversalDebug --stacktrace --no-daemon
+          ./gradlew assemblePlayDebug --stacktrace --no-daemon
 
-      # 5. 上传通用包（修正对应路径）
+      # 上传环节：严格对应 Play 渠道真实输出目录，仅编译成功才执行上传
       - name: 上传APK成品
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: openclaw-android-universal-node
-          path: apps/android/app/build/outputs/apk/universal/debug/*.apk
+          name: openclaw-android-node-debug
+          path: apps/android/app/build/outputs/apk/play/debug/*.apk
           retention-days: 180
