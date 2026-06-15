@@ -1,4 +1,4 @@
-name: 编译OpenClaw安卓纯节点APK
+name: 编译OpenClaw安卓纯节点APK(通用版)
 on:
   workflow_dispatch:
 
@@ -10,7 +10,7 @@ jobs:
       - name: 拉取源码
         uses: actions/checkout@v5
 
-      # 2. 安卓编译仅需JDK17，不需要Node/pnpm
+      # 2. 安装JDK17
       - name: 安装JDK17
         uses: actions/setup-java@v5
         with:
@@ -22,18 +22,18 @@ jobs:
       - name: 部署安卓SDK环境
         uses: android-actions/setup-android@v4
 
-      # 4. 进入安卓目录赋予权限并编译
+      # 4. 编译 universal 通用纯净包
       - name: 编译APK
         working-directory: ./apps/android
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --stacktrace --no-daemon
+          ./gradlew assembleUniversalDebug --stacktrace --no-daemon
 
-      # 5. 编译成功上传APK
+      # 5. 上传通用包（修正对应路径）
       - name: 上传APK成品
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: openclaw-android-node-debug
-          path: apps/android/app/build/outputs/apk/debug/*.apk
+          name: openclaw-android-universal-node
+          path: apps/android/app/build/outputs/apk/universal/debug/*.apk
           retention-days: 180
